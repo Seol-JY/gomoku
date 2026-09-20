@@ -1,0 +1,45 @@
+# Local development stack; database only:
+#   docker compose up -d db
+# Or the whole thing (database + server on :3000):
+#   docker compose up --build
+#
+# ports / credentials: copy .env.example to .env
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: gomoku-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gomoku}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gomoku}
+      POSTGRES_DB: ${POSTGRES_DB:-gomoku}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - gomoku-pgdata:/var/lib/postgresql/data
+      # test database setup for `cargo test -p server`
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gomoku} -d ${POSTGRES_DB:-gomoku}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: gomoku-server
+    profiles: ["full"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOMOKU_BIND: 0.0.0.0:3000
+      GOMOKU_DATABASE_URL: postgres://${POSTGRES_USER:-gomoku}:${POSTGRES_PASSWORD:-gomoku}@db:5432/${POSTGRES_DB:-gomoku}
+      RUST_LOG: ${RUST_LOG:-info,tower_http=info,sqlx=warn}
+    ports:
+      - "${GOMOKU_PORT:-3000}:3000"
+
+volumes:
+  gomoku-pgdata:

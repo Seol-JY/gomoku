@@ -1,0 +1,82 @@
+# main 푸시마다 서버 이미지 GHCR push + seol-gitops 태그 갱신
+# 클라이언트 릴리스는 release-plz + dist 가 태그 기준으로 별도 처리
+name: server-image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "proto/**"
+      - "rules/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/server-image.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/seol-jy/gomoku-server
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  bump-gitops:
+    needs: build-push
+    runs-on: ubuntu-latest
+    env:
+      GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}  # seol-gitops contents:write PAT, 없으면 수동 갱신
+    steps:
+      - name: token check
+        id: token
+        run: echo "present=${{ env.GITOPS_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.token.outputs.present == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Seol-JY/seol-gitops
+          token: ${{ env.GITOPS_TOKEN }}
+      - if: steps.token.outputs.present == 'true'
+        name: update image tag
+        run: |
+          set -eu
+          file=apps/gomoku/kustomization.yaml
+          tag='${{ needs.build-push.outputs.tag }}'
+          python3 - "$file" "$tag" <<'PY'
+          import re, sys
+          path, tag = sys.argv[1], sys.argv[2]
+          s = open(path).read()
+          s, n = re.subn(r'(- name: ghcr\.io/seol-jy/gomoku-server\n\s*newTag: )"?[0-9a-f]+"?', rf'\g<1>"{tag}"', s)
+          assert n == 1, "image entry not found"
+          open(path, "w").write(s)
+          PY
+          git config user.name "gomoku-ci"
+          git config user.email "gomoku-ci@users.noreply.github.com"
+          git add "$file"
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(gomoku): 이미지 태그 ${tag} 갱신"
+          git push

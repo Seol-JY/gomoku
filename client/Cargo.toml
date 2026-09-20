@@ -1,0 +1,44 @@
+[package]
+name = "gomoku"
+description = "Play Gomoku (Renju rules) with a friend, in your terminal."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# publish = false 가 dist 에서도 숨기므로 명시
+[package.metadata.dist]
+dist = true
+
+[[bin]]
+name = "gomoku"
+path = "src/main.rs"
+
+[dependencies]
+rules = { workspace = true }
+proto = { workspace = true }
+anyhow = { workspace = true }
+arboard = { workspace = true }
+axoupdater = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true }
+crossterm = { workspace = true }
+directories = { workspace = true }
+eventsource-stream = { workspace = true }
+futures = { workspace = true }
+ratatui = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+unicode-width = { workspace = true }
+
+[lints]
+workspace = true

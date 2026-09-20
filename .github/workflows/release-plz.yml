@@ -1,0 +1,28 @@
+# main 푸시마다 릴리스 PR(버전 범프 + CHANGELOG) 갱신, 머지 시 vX.Y.Z 태그
+# 태그 이후는 dist 의 release.yml 담당 (바이너리, Homebrew formula)
+name: release-plz
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-plz
+  cancel-in-progress: false
+
+jobs:
+  release-plz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}  # PAT 없으면 태그가 release.yml 을 깨우지 못함, 수동 태그 푸시
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: release-plz/action@v0.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}

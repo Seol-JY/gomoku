@@ -1,0 +1,21 @@
+# `dist init` 이 이 파일로 .github/workflows/release.yml 생성, 생성물은 수정 금지
+# cargo-dist-version 은 dist init 이 기록
+[workspace]
+members = ["cargo:."]
+
+# Config for 'dist'
+[dist]
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = ["shell"]
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
+# Whether to install an updater program
+install-updater = false
+# Whether to enable GitHub Attestations
+github-attestations = true
+# The preferred dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.33.0"

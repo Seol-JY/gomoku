@@ -1,0 +1,17 @@
+# 워크스페이스 단일 버전, crates.io 미배포, 태그만 생성
+# GitHub Release 는 dist 담당이라 여기서는 비활성
+[workspace]
+publish = false
+git_release_enable = false
+git_tag_enable = false
+changelog_update = true
+dependencies_update = false
+semver_check = false
+release_commits = "^(feat|fix|perf|refactor)[(:!]"
+
+# 태그는 client 하나에만: dist 는 태그 하나로 워크스페이스 전체 빌드
+[[package]]
+name = "gomoku"
+git_tag_enable = true
+git_tag_name = "v{{ version }}"
+changelog_path = "./CHANGELOG.md"

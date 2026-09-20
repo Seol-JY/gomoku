@@ -1,0 +1,3 @@
+[alias]
+srv = "run -p server --"
+cli = "run -p gomoku --bin gomoku --"
