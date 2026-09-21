@@ -354,7 +354,13 @@ async fn update_hint(api: &Api) {
 /// installer or Homebrew, so `cargo install` builds fall back to instructions
 async fn self_update() -> Result<ExitCode> {
     let mut updater = axoupdater::AxoUpdater::new_for("gomoku");
-    if updater.load_receipt().is_err() {
+    // receipt of another install (installer, then brew) must not update the wrong copy
+    let owned_by_receipt = updater.load_receipt().is_ok()
+        && match (updater.install_prefix_root(), std::env::current_exe()) {
+            (Ok(prefix), Ok(exe)) => exe.starts_with(prefix.as_std_path()),
+            _ => false,
+        };
+    if !owned_by_receipt {
         println!(
             "This copy was not installed by the gomoku installer, so it cannot update itself."
         );
