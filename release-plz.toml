@@ -16,3 +16,16 @@ name = "gomoku"
 git_tag_enable = true
 git_tag_name = "v{{ version }}"
 changelog_path = "./CHANGELOG.md"
+
+# 라이브러리·서버는 릴리스 대상 아님: 버전은 워크스페이스 공통, 태그와 CHANGELOG 는 gomoku 하나로
+[[package]]
+name = "rules"
+release = false
+
+[[package]]
+name = "proto"
+release = false
+
+[[package]]
+name = "server"
+release = false
