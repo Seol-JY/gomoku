@@ -1,0 +1,14 @@
+# 일회성 진단: GITHUB_TOKEN 으로 릴리스 생성 가능 여부
+name: debug-perm
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - run: gh api repos/${{ github.repository }} --jq '.permissions' || true
+      - run: gh api -X POST repos/${{ github.repository }}/releases -f tag_name=debug-probe -f target_commitish=main -F draft=true -f name=probe --jq '.id' > id.txt && echo "created draft $(cat id.txt)" && gh api -X DELETE repos/${{ github.repository }}/releases/$(cat id.txt) && echo deleted
