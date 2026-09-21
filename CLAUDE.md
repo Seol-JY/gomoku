@@ -88,6 +88,9 @@ GOMOKU_CONFIG_DIR=/tmp/p2 cargo cli join ABC234      # 같은 머신에서 두 �
 - 되돌리기: 서버는 `newTag`를 이전 SHA로. 마이그레이션은 추가만 하고 컬럼 삭제는 하지 않아 구버전이 새 스키마에서도 돌게 한다.
 - PAT 없을 때의 동작: `server-image.yml`은 이미지만 올리고 gitops 태그 갱신은 건너뜀(`newTag` 수동), `release-plz.yml`은 GITHUB_TOKEN으로 PR만 만들고 태그는 `release.yml`을 깨우지 못함(태그 수동 푸시). PAT(`GITOPS_TOKEN`, `RELEASE_PLZ_TOKEN`, `HOMEBREW_TAP_TOKEN`) 등록 시 전부 자동화
 - 커밋 주체는 항상 `Seol-JY <wlsdud5654@gmail.com>`(레포 로컬 git config). 전역 설정은 회사 계정이라 새 클론마다 다시 지정
+- k3s 노드는 arm64(OCI Ampere). 서버 이미지는 amd64·arm64 네이티브 러너로 각각 빌드해 매니페스트 병합(`server-image.yml`). 단일 아치로 바꾸면 pull 실패
+- release-plz는 `git_only = true`여야 `publish = false` 크레이트를 태그한다. 릴리스 워크플로가 릴리스를 만들려면 레포 Actions 설정이 "Read and write"여야 함(이미 설정)
+- Cloudflare `seol.pro` DNS는 API 토큰이 없어 수동: `api-gomoku` A 레코드 → NLB IP, DNS only
 - 서버 보안: 익명 등록에 rate limit 없음(친구용이라 보류), 토큰 만료 없음(`credentials.expires_at` NULL). 필요해지면 컬럼은 이미 있음
 
 ## 하지 않는 것
