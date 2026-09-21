@@ -2,6 +2,7 @@
 # GitHub Release 는 dist 담당이라 여기서는 비활성
 [workspace]
 publish = false
+git_only = true  # publish = false 크레이트도 태그 대상, 버전 기준은 git 태그
 git_release_enable = false
 git_tag_enable = false
 changelog_update = true
