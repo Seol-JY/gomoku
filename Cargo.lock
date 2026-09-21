@@ -1202,7 +1202,7 @@ dependencies = [
 
 [[package]]
 name = "gomoku"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "arboard",
@@ -2351,7 +2351,7 @@ dependencies = [
 
 [[package]]
 name = "proto"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rules",
  "serde",
@@ -2691,7 +2691,7 @@ dependencies = [
 
 [[package]]
 name = "rules"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "rustc-hash"
@@ -2949,7 +2949,7 @@ dependencies = [
 
 [[package]]
 name = "server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-stream",
